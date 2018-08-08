@@ -31,9 +31,9 @@ parser.add_argument('--results_dir', metavar='RESULTS_DIR', default='./results',
                     help='results dir')
 parser.add_argument('--save', metavar='SAVE', default='',
                     help='saved folder')
-parser.add_argument('--dataset', metavar='DATASET', default='imagenet',
+parser.add_argument('--dataset', metavar='DATASET', default='cifar10',
                     help='dataset name or folder')
-parser.add_argument('--model', '-a', metavar='MODEL', default='alexnet',
+parser.add_argument('--model', '-a', metavar='MODEL', default='resnet',
                     choices=model_names,
                     help='model architecture: ' +
                     ' | '.join(model_names) +
@@ -60,7 +60,7 @@ parser.add_argument('--dist-backend', default='nccl', type=str,
                     help='distributed backend')
 parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
                     help='number of data loading workers (default: 8)')
-parser.add_argument('--epochs', default=90, type=int, metavar='N',
+parser.add_argument('--epochs', default=2000, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -243,16 +243,16 @@ def main():
 
         results.add(epoch=epoch + 1, train_loss=train_loss, val_loss=val_loss,
                     train_error1=100 - train_prec1, val_error1=100 - val_prec1,
-                    train_error5=100 - train_prec5, val_error5=100 - val_prec5)
+                    train_error5=100 - train_prec5, val_error5=100 - val_prec5, fc_norm=float(model.fc.weight.norm()))
         results.plot(x='epoch', y=['train_loss', 'val_loss'],
                      legend=['training', 'validation'],
                      title='Loss', ylabel='loss')
         results.plot(x='epoch', y=['train_error1', 'val_error1'],
                      legend=['training', 'validation'],
                      title='Error@1', ylabel='error %')
-        results.plot(x='epoch', y=['train_error5', 'val_error5'],
-                     legend=['training', 'validation'],
-                     title='Error@5', ylabel='error %')
+        results.plot(x='epoch', y=['fc_norm'], x_axis_type='log',
+                     legend=['L2 norm'],
+                     title='classifier norm', ylabel='norm value')
         results.save()
 
 
